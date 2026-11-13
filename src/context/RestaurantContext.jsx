@@ -80,6 +80,7 @@ export function RestaurantProvider({ children }) {
 
   const [activeOrderId, setActiveOrderId] = useState('ORD-1001');
   const [currentView, setCurrentView] = useState('customer'); // 'customer' | 'kitchen' | 'cashier' | 'system' | 'flow'
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Realtime System Audit Logs (Reflecting System Swimlane)
   const [systemLogs, setSystemLogs] = useState([
@@ -381,6 +382,88 @@ export function RestaurantProvider({ children }) {
   };
 
   // ==========================================
+  // Manager: Takes dine-in order for a selected table
+  // Dispatches directly to Chef with food items, required stock, and customer instructions
+  // ==========================================
+  const createManagerOrder = ({
+    tableNumber,
+    tableId = null,
+    items = [],
+    customerName = 'Table Guest',
+    specialInstructions = ''
+  }) => {
+    if (!items || items.length === 0) {
+      return { success: false, error: 'Please select at least one food item.' };
+    }
+
+    const tableObj = tables.find(t => t.number === Number(tableNumber) || t.id === tableId);
+    const actualTableId = tableObj ? tableObj.id : (tableId || `T${tableNumber}`);
+    const actualTableNumber = tableObj ? tableObj.number : Number(tableNumber);
+
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const taxRate = 0.05;
+    const taxAmount = Number((subtotal * taxRate).toFixed(2));
+    const total = Number((subtotal + taxAmount).toFixed(2));
+
+    const newOrderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+
+    const newOrder = {
+      id: newOrderId,
+      customerName: customerName || `Table ${actualTableNumber} Guest`,
+      customerPhone: '',
+      orderType: 'dine-in',
+      tableId: actualTableId,
+      tableNumber: actualTableNumber,
+      deliveryAddress: null,
+      items: items.map(item => ({
+        ...item,
+        notes: item.notes || ''
+      })),
+      specialInstructions: specialInstructions || null,
+      status: 'PLACED', // Dispatched directly to Chef / Kitchen
+      subtotal,
+      taxRate,
+      taxAmount,
+      discountCode: null,
+      discountAmount: 0,
+      total,
+      paymentStatus: 'PENDING',
+      paymentMethod: null,
+      paymentFailureReason: null,
+      receiptNumber: null,
+      createdAt: new Date().toISOString(),
+      logs: [
+        { time: 'Just now', action: `Manager placed order for Table #${actualTableNumber} -> Dispatched to Chef` }
+      ]
+    };
+
+    // Deduct stock for ordered items
+    setMenu(prev => prev.map(m => {
+      const ordered = items.find(c => c.id === m.id);
+      if (ordered) {
+        const remaining = Math.max(0, m.stockCount - ordered.quantity);
+        return { ...m, stockCount: remaining, inStock: remaining > 0 };
+      }
+      return m;
+    }));
+
+    // Mark table as occupied
+    if (actualTableId) {
+      setTables(prev => prev.map(t => (t.id === actualTableId || t.number === actualTableNumber) ? { ...t, status: 'occupied' } : t));
+      updateTableInFirebase(actualTableId, 'occupied');
+    }
+
+    setOrders(prev => [newOrder, ...prev]);
+    setActiveOrderId(newOrderId);
+    saveOrderToFirebase(newOrder);
+
+    addSystemLog('Manager', `Manager placed Order ${newOrderId} for Table #${actualTableNumber} -> Sent to Chef`, 'success');
+    notifyUser('Order Sent to Chef!', `Order #${newOrderId} for Table #${actualTableNumber} sent to kitchen.`);
+
+    return { success: true, order: newOrder };
+  };
+
+  // ==========================================
   // Step: Kitchen Staff receives order details & prepares food
   // ==========================================
   const startPreparingOrder = (orderId) => {
@@ -643,6 +726,7 @@ export function RestaurantProvider({ children }) {
         clearCart,
         validateOrder,
         createOrder,
+        createManagerOrder,
         startPreparingOrder,
         markOrderReady,
         processPayment,
@@ -650,7 +734,9 @@ export function RestaurantProvider({ children }) {
         cancelOrder,
         toggleItemStock,
         toggleTableStatus,
-        resetToDemoState
+        resetToDemoState,
+        searchQuery,
+        setSearchQuery
       }}
     >
       {children}

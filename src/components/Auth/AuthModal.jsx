@@ -12,7 +12,8 @@ import {
   UtensilsCrossed, 
   Sparkles,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Crown
 } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
@@ -134,37 +135,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
             <button
               type="button"
-              onClick={() => handleDemoSelect('cashier')}
-              className="p-2.5 rounded-xl bg-white/5 hover:bg-blue-500/15 border border-white/10 hover:border-blue-500/40 text-left transition-all group"
-            >
-              <div className="flex items-center gap-2 font-bold text-white group-hover:text-blue-400">
-                <CreditCard size={16} className="text-blue-400" />
-                <span>Cashier Desk</span>
-              </div>
-              <div className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
-                cashier.lisa@gmail.com
-              </div>
-              <div className="text-[9px] text-blue-400 mt-1 font-semibold flex items-center gap-1">
-                <ArrowRight size={10} />
-                <span>Opens POS Billing</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
               onClick={() => handleDemoSelect('system')}
-              className="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/40 text-left transition-all group"
+              className="p-2.5 rounded-xl bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/40 text-left transition-all group"
             >
-              <div className="flex items-center gap-2 font-bold text-white group-hover:text-emerald-400">
-                <Settings2 size={16} className="text-emerald-400" />
-                <span>System Admin</span>
+              <div className="flex items-center gap-2 font-bold text-white group-hover:text-amber-400">
+                <Crown size={16} className="text-amber-400" />
+                <span>Restaurant Manager</span>
               </div>
               <div className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
-                admin.robert@gmail.com
+                manager@admin.com
               </div>
-              <div className="text-[9px] text-emerald-400 mt-1 font-semibold flex items-center gap-1">
+              <div className="text-[9px] text-amber-400 mt-1 font-semibold flex items-center gap-1">
                 <ArrowRight size={10} />
-                <span>Opens System Engine</span>
+                <span>Opens Manager Desk</span>
               </div>
             </button>
 
@@ -241,7 +224,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="email"
-                placeholder="you@gmail.com (include 'chef', 'cashier', or 'admin')"
+                placeholder="you@gmail.com, staff@staff.com, or manager@admin.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

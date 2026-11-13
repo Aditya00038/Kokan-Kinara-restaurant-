@@ -273,15 +273,7 @@ export default function LandingPage({ onGetStarted, onSelectRole }) {
                 className="hover:text-rose-400 transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 <span className="w-2 h-2 rounded-full bg-rose-400" />
-                <span>Kitchen (@staff.com)</span>
-              </button>
-              <button 
-                type="button"
-                onClick={() => onSelectRole('cashier')} 
-                className="hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1.5"
-              >
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
-                <span>Cashier (@staff.com)</span>
+                <span>Chef / Kitchen (@staff.com)</span>
               </button>
               <button 
                 type="button"
@@ -421,8 +413,8 @@ export default function LandingPage({ onGetStarted, onSelectRole }) {
             </button>
           </div>
 
-          {/* 4 Colorful Workspace Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* 3 Dedicated Role Workspaces */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Card 1: Customer (@gmail.com) */}
             <div className="p-7 rounded-3xl bg-gradient-to-b from-emerald-500/10 via-slate-900 to-slate-950 border border-emerald-500/30 hover:border-emerald-400 transition-all flex flex-col justify-between group shadow-lg">
@@ -462,7 +454,7 @@ export default function LandingPage({ onGetStarted, onSelectRole }) {
               </div>
             </div>
 
-            {/* Card 2: Kitchen (@staff.com) */}
+            {/* Card 2: Kitchen Staff (@staff.com) */}
             <div className="p-7 rounded-3xl bg-gradient-to-b from-rose-500/10 via-slate-900 to-slate-950 border border-rose-500/30 hover:border-rose-400 transition-all flex flex-col justify-between group shadow-lg">
               <div>
                 <div className="w-13 h-13 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform font-bold border border-rose-500/30">
@@ -470,17 +462,17 @@ export default function LandingPage({ onGetStarted, onSelectRole }) {
                 </div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] uppercase font-mono font-bold text-rose-400 tracking-wider">
-                    Kitchen Staff
+                    Chef & Kitchen
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono font-bold">
                     @staff.com
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  Kitchen Display (KDS)
+                  Chef & Kitchen Rail
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed mb-5">
-                  Incoming tickets board for kitchen staff. Track preparation countdowns, cooking stages, and click "Mark Ready" to notify the system and generate bills.
+                  Live order queue: View ordered items, table numbers, required food stock, and customer preparation instructions in real time.
                 </p>
               </div>
 
@@ -500,45 +492,7 @@ export default function LandingPage({ onGetStarted, onSelectRole }) {
               </div>
             </div>
 
-            {/* Card 3: Cashier (@staff.com) */}
-            <div className="p-7 rounded-3xl bg-gradient-to-b from-blue-500/10 via-slate-900 to-slate-950 border border-blue-500/30 hover:border-blue-400 transition-all flex flex-col justify-between group shadow-lg">
-              <div>
-                <div className="w-13 h-13 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform font-bold border border-blue-500/30">
-                  <CreditCard size={24} />
-                </div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] uppercase font-mono font-bold text-blue-400 tracking-wider">
-                    Cashier POS
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-mono font-bold">
-                    @staff.com
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Cashier & POS Desk
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed mb-5">
-                  Billing register: Cash calculator with change due, Card swipe, dynamic UPI QR codes, and instant tax invoice generation upon payment.
-                </p>
-              </div>
-
-              <div>
-                <div className="text-[10px] text-slate-400 font-mono mb-2 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  <span>Domain required: <strong className="text-blue-400">@staff.com</strong></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onSelectRole('cashier')}
-                  className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 cursor-pointer"
-                >
-                  <span>Sign In / Register</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Card 4: Manager & Admin (@admin.com) */}
+            {/* Card 3: Restaurant Manager (@admin.com) */}
             <div className="p-7 rounded-3xl bg-gradient-to-b from-purple-500/10 via-slate-900 to-slate-950 border border-purple-500/30 hover:border-purple-400 transition-all flex flex-col justify-between group shadow-lg">
               <div>
                 <div className="w-13 h-13 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform font-bold border border-purple-500/30">
@@ -546,17 +500,17 @@ export default function LandingPage({ onGetStarted, onSelectRole }) {
                 </div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] uppercase font-mono font-bold text-purple-400 tracking-wider">
-                    Manager & Admin
+                    Manager Desk
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono font-bold">
                     @admin.com
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  System State Engine
+                  Restaurant Manager
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed mb-5">
-                  Autonomous validation logic: checks table occupancy, decrements stock count, calculates 5% GST, and streams system audit logs.
+                  Select table number, take customer food orders with custom instructions, dispatch directly to chef, settle bills, and manage stock inventory.
                 </p>
               </div>
 

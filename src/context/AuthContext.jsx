@@ -15,17 +15,17 @@ const AuthContext = createContext();
 /**
  * Strict role detection based on email domain:
  * - @gmail.com -> Dining Customer
- * - @staff.com -> Kitchen Staff (or Cashier POS if cashier@staff.com)
- * - @admin.com -> Manager & Administrator
+ * - @staff.com -> Chef / Kitchen Staff
+ * - @admin.com -> Restaurant Manager
  */
 export const detectRoleFromEmail = (email = '') => {
   const lower = email.trim().toLowerCase();
 
-  // 1. Manager & Admin domain (@admin.com)
+  // 1. Manager domain (@admin.com)
   if (lower.endsWith('@admin.com')) {
     return {
       role: 'system',
-      label: 'Manager & Admin',
+      label: 'Restaurant Manager',
       defaultView: 'system',
       domain: '@admin.com',
       badgeColor: 'badge-purple',
@@ -34,22 +34,11 @@ export const detectRoleFromEmail = (email = '') => {
     };
   }
 
-  // 2. Staff domain (@staff.com)
+  // 2. Chef / Kitchen domain (@staff.com)
   if (lower.endsWith('@staff.com')) {
-    if (lower.startsWith('cashier') || lower.startsWith('pos') || lower.startsWith('billing')) {
-      return {
-        role: 'cashier',
-        label: 'Cashier POS Desk',
-        defaultView: 'cashier',
-        domain: '@staff.com',
-        badgeColor: 'badge-blue',
-        accentColor: 'blue',
-        allowedDomain: '@staff.com'
-      };
-    }
     return {
       role: 'kitchen',
-      label: 'Kitchen Staff',
+      label: 'Chef / Kitchen',
       defaultView: 'kitchen',
       domain: '@staff.com',
       badgeColor: 'badge-rose',
@@ -73,8 +62,8 @@ export const detectRoleFromEmail = (email = '') => {
 /**
  * Validate that an email meets domain rules:
  * - Customers: must use @gmail.com
- * - Kitchen & Cashier Staff: must use @staff.com
- * - Manager & Admin: must use @admin.com
+ * - Kitchen & Chef: must use @staff.com
+ * - Manager: must use @admin.com
  */
 export const validateRoleDomain = (email = '', intendedRole = 'customer') => {
   const lower = email.trim().toLowerCase();
@@ -86,15 +75,11 @@ export const validateRoleDomain = (email = '', intendedRole = 'customer') => {
     }
   } else if (intendedRole === 'kitchen') {
     if (!lower.endsWith('@staff.com')) {
-      return 'Kitchen staff accounts must use an official @staff.com email address.';
+      return 'Chef & Kitchen staff accounts must use an official @staff.com email address.';
     }
-  } else if (intendedRole === 'cashier') {
-    if (!lower.endsWith('@staff.com')) {
-      return 'Cashier staff accounts must use an official @staff.com email address.';
-    }
-  } else if (intendedRole === 'system' || intendedRole === 'admin') {
+  } else if (intendedRole === 'system' || intendedRole === 'manager' || intendedRole === 'admin') {
     if (!lower.endsWith('@admin.com')) {
-      return 'Manager & Admin accounts must use an official @admin.com email address.';
+      return 'Restaurant Manager accounts must use an official @admin.com email address.';
     }
   }
 

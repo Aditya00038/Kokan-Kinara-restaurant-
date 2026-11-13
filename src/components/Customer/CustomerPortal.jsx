@@ -12,7 +12,8 @@ import {
   X,
   AlertTriangle, 
   Sparkles,
-  XCircle
+  XCircle,
+  GlassWater
 } from 'lucide-react';
 import ReceiptModal from '../Common/ReceiptModal';
 
@@ -25,13 +26,15 @@ export default function CustomerPortal({ isCartOpen, setIsCartOpen }) {
     updateCartQuantity, 
     removeFromCart, 
     clearCart,
-    createOrder
+    createOrder,
+    searchQuery,
+    setSearchQuery
   } = useRestaurant();
 
   // Filters
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
   const [dietFilter, setDietFilter] = useState('all'); // all, veg, non-veg
+  const [activeFeatureTab, setActiveFeatureTab] = useState('dining'); // 'dining' | 'delivery' | 'nightlife'
 
   // Order Placement Form state
   const [customerName, setCustomerName] = useState('Sushant Sawant');
@@ -143,14 +146,106 @@ export default function CustomerPortal({ isCartOpen, setIsCartOpen }) {
     setValidationModal(null);
   };
 
+  const handleFeatureTabClick = (tab) => {
+    setActiveFeatureTab(tab);
+    if (tab === 'dining') {
+      setOrderType('dine-in');
+      if (selectedCategory === 'Drinks & Desserts') setSelectedCategory('All');
+    } else if (tab === 'delivery') {
+      setOrderType('delivery');
+      if (selectedCategory === 'Drinks & Desserts') setSelectedCategory('All');
+    } else if (tab === 'nightlife') {
+      setSelectedCategory('Drinks & Desserts');
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 min-h-[calc(100vh-80px)] text-slate-800">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 min-h-[calc(100vh-80px)] text-slate-800">
       
+      {/* Breadcrumb */}
+      <nav className="text-[11px] sm:text-xs text-slate-400 flex items-center gap-2 mb-4 overflow-x-auto whitespace-nowrap">
+        <span className="hover:text-slate-600 cursor-pointer">Home</span>
+        <span>/</span>
+        <span className="hover:text-slate-600 cursor-pointer">Menu</span>
+        <span>/</span>
+        <span className="text-slate-600 font-medium">Kokan Kinara</span>
+      </nav>
+
+      {/* Zomato-Style Feature Tabs (Dining Out | Delivery | Nightlife) */}
+      <div className="flex items-center gap-6 sm:gap-10 border-b border-slate-200 mb-6 overflow-x-auto scrollbar-none">
+        {/* Dining Out */}
+        <button
+          type="button"
+          onClick={() => handleFeatureTabClick('dining')}
+          className={`flex items-center gap-3 pb-3 transition-all cursor-pointer border-b-2 whitespace-nowrap group ${
+            activeFeatureTab === 'dining'
+              ? 'border-rose-500 text-rose-600 font-bold'
+              : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
+          }`}
+        >
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
+            activeFeatureTab === 'dining'
+              ? 'bg-teal-50 text-teal-600 ring-2 ring-teal-200/60 shadow-xs'
+              : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+          }`}>
+            <UtensilsCrossed size={22} strokeWidth={2.2} />
+          </div>
+          <span className="text-sm sm:text-lg">
+            Dining Out
+          </span>
+        </button>
+
+        {/* Delivery */}
+        <button
+          type="button"
+          onClick={() => handleFeatureTabClick('delivery')}
+          className={`flex items-center gap-3 pb-3 transition-all cursor-pointer border-b-2 whitespace-nowrap group ${
+            activeFeatureTab === 'delivery'
+              ? 'border-rose-500 text-rose-600 font-bold'
+              : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
+          }`}
+        >
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
+            activeFeatureTab === 'delivery'
+              ? 'bg-rose-50 text-rose-600 ring-2 ring-rose-200/60 shadow-xs'
+              : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+          }`}>
+            <Bike size={22} strokeWidth={2.2} />
+          </div>
+          <span className="text-sm sm:text-lg">
+            Delivery
+          </span>
+        </button>
+
+        {/* Nightlife */}
+        <button
+          type="button"
+          onClick={() => handleFeatureTabClick('nightlife')}
+          className={`flex items-center gap-3 pb-3 transition-all cursor-pointer border-b-2 whitespace-nowrap group ${
+            activeFeatureTab === 'nightlife'
+              ? 'border-rose-500 text-rose-600 font-bold'
+              : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
+          }`}
+        >
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
+            activeFeatureTab === 'nightlife'
+              ? 'bg-amber-50 text-amber-600 ring-2 ring-amber-200/60 shadow-xs'
+              : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+          }`}>
+            <GlassWater size={22} strokeWidth={2.2} />
+          </div>
+          <span className="text-sm sm:text-lg">
+            Nightlife
+          </span>
+        </button>
+      </div>
+
       {/* Menu Browsing & Filtering */}
       <div>
-        {/* Controls: Search, Dietary toggle */}
+        {/* Controls: Mobile Search + Dietary toggle */}
         <div className="flex gap-3.5 mb-5 flex-wrap items-center">
-            <div className="relative flex-1 min-w-[240px]">
+            {/* Mobile Search Input (Visible only on smaller screens) */}
+            <div className="relative flex-1 min-w-[240px] md:hidden">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"

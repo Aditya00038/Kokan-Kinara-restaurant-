@@ -6,7 +6,6 @@ import LandingPage from './components/Landing/LandingPage';
 import AuthPage from './components/Auth/AuthPage';
 import CustomerPortal from './components/Customer/CustomerPortal';
 import KitchenDisplay from './components/Kitchen/KitchenDisplay';
-import CashierPOS from './components/Cashier/CashierPOS';
 import SystemManager from './components/System/SystemManager';
 import PWABadge from './PWABadge.jsx';
 
@@ -85,8 +84,7 @@ function MainApp() {
               <CustomerPortal isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} />
             )}
             {currentUser.role === 'kitchen' && <KitchenDisplay />}
-            {currentUser.role === 'cashier' && <CashierPOS />}
-            {currentUser.role === 'system' && <SystemManager />}
+            {(currentUser.role === 'system' || currentUser.role === 'manager' || currentUser.role === 'cashier') && <SystemManager />}
           </main>
         </>
       )}

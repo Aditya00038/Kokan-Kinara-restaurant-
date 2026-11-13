@@ -47,25 +47,18 @@ export default function AuthPage({ initialRole = 'customer', onBackToHome, onAut
       hint: 'Requires @gmail.com'
     },
     {
-      id: 'kitchen',
-      label: 'Kitchen',
-      domain: '@staff.com',
-      icon: ChefHat,
-      hint: 'Requires @staff.com'
-    },
-    {
-      id: 'cashier',
-      label: 'Cashier',
-      domain: '@staff.com',
-      icon: CreditCard,
-      hint: 'Requires @staff.com'
-    },
-    {
       id: 'system',
-      label: 'Admin',
+      label: 'Manager',
       domain: '@admin.com',
       icon: ShieldCheck,
       hint: 'Requires @admin.com'
+    },
+    {
+      id: 'kitchen',
+      label: 'Chef',
+      domain: '@staff.com',
+      icon: ChefHat,
+      hint: 'Requires @staff.com'
     }
   ];
 
@@ -214,7 +207,7 @@ export default function AuthPage({ initialRole = 'customer', onBackToHome, onAut
                 {currentRole.hint}
               </span>
             </div>
-            <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl">
               {roles.map((role) => {
                 const Icon = role.icon;
                 const isSelected = selectedRole === role.id;

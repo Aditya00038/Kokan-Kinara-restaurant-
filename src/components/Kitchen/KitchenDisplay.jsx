@@ -15,6 +15,7 @@ import {
 export default function KitchenDisplay() {
   const { 
     orders, 
+    menu,
     startPreparingOrder, 
     markOrderReady,
     setCurrentView
@@ -208,19 +209,21 @@ export default function KitchenDisplay() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      {/* Prominent Table Number Badge */}
+                      <div className="flex items-center gap-2 mt-1">
                         {order.orderType === 'dine-in' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
-                            Table {order.tableNumber}
-                          </span>
+                          <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-900 px-3 py-1 rounded-lg font-black text-xs sm:text-sm shadow-xs">
+                            <span className="uppercase text-[10px] tracking-wider text-amber-700 font-bold">Table</span>
+                            <span className="text-base text-amber-950 font-mono">#{order.tableNumber}</span>
+                          </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200">
-                            <Bike size={13} className="text-amber-600" />
-                            <span>Delivery</span>
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                            <Bike size={14} className="text-amber-600" />
+                            <span>Takeaway / Delivery</span>
                           </span>
                         )}
-                        <span className="text-[11px] text-slate-400">
-                          ({totalItemCount} {totalItemCount === 1 ? 'item' : 'items'})
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
                         </span>
                       </div>
                     </div>
@@ -242,31 +245,69 @@ export default function KitchenDisplay() {
                     </div>
                   </div>
 
-                  {/* Items List Box */}
+                  {/* General Customer Instructions (if added by Manager) */}
+                  {order.specialInstructions && (
+                    <div className="mb-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                      <AlertCircle size={14} className="shrink-0 text-amber-600 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-[11px] uppercase tracking-wide text-amber-800 block">Customer Instructions:</span>
+                        <span className="font-medium">{order.specialInstructions}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Items List Box with Required Stock details */}
                   <div className="bg-slate-50 rounded-xl p-3 mb-4 border border-slate-200/70">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-bold font-mono">
-                      Ticket Items ({totalItemCount} total):
+                    <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-bold font-mono flex items-center justify-between">
+                      <span>Ordered Food Items:</span>
+                      <span>Required Stock:</span>
                     </div>
                     
-                    <div className="space-y-2">
-                      {order.items.map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 text-xs py-0.5">
-                          <span className="w-5 h-5 rounded-md bg-amber-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                            {item.quantity}x
-                          </span>
-                          <div className="flex-1">
-                            <div className="font-semibold text-slate-900 leading-snug">
-                              {item.name}
-                            </div>
-                            {item.notes && (
-                              <div className="text-[11px] text-amber-800 bg-amber-50/90 border border-amber-200/80 rounded-md px-2 py-0.5 mt-1 inline-flex items-center gap-1 font-medium">
-                                <AlertCircle size={11} className="shrink-0 text-amber-600" />
-                                <span>Note: {item.notes}</span>
+                    <div className="space-y-2.5">
+                      {order.items.map((item, idx) => {
+                        const menuItem = menu?.find(m => m.id === item.id || m.name.toLowerCase() === item.name.toLowerCase());
+                        const stockLeft = menuItem?.stockCount ?? 'N/A';
+                        const isLowStock = menuItem && menuItem.stockCount <= 3;
+
+                        return (
+                          <div key={idx} className="flex items-start justify-between gap-2 text-xs py-1 border-b border-slate-100 last:border-0">
+                            <div className="flex items-start gap-2">
+                              <span className="w-5 h-5 rounded-md bg-amber-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                                {item.quantity}x
+                              </span>
+                              <div>
+                                <div className="font-bold text-slate-900 leading-snug">
+                                  {item.name}
+                                </div>
+                                {item.notes && (
+                                  <div className="text-[11px] text-amber-800 bg-amber-50/90 border border-amber-200/80 rounded-md px-2 py-0.5 mt-1 inline-flex items-center gap-1 font-medium">
+                                    <AlertCircle size={11} className="shrink-0 text-amber-600" />
+                                    <span>Instruction: {item.notes}</span>
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            </div>
+
+                            {/* Required Stock info */}
+                            <div className="text-right shrink-0">
+                              <div className="text-[11px] font-bold text-slate-700">
+                                {item.quantity} {item.quantity === 1 ? 'portion' : 'portions'}
+                              </div>
+                              <div className="mt-0.5">
+                                {isLowStock ? (
+                                  <span className="text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
+                                    Stock: {stockLeft} left
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-medium text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                                    Stock: {stockLeft} left
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
