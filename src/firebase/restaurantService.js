@@ -15,6 +15,7 @@ const ORDERS_COL = 'orders';
 const TABLES_COL = 'tables';
 const MENU_COL = 'menu';
 const LOGS_COL = 'systemLogs';
+const SESSIONS_COL = 'diningSessions';
 
 // Real-time listener for Orders
 export const subscribeOrders = (onUpdate, onError) => {
@@ -106,6 +107,41 @@ export const addSystemLogToFirebase = async (log) => {
     });
     return true;
   } catch {
+    return false;
+  }
+};
+
+// Dining Sessions Real-time Subscription
+export const subscribeDiningSessions = (onUpdate, onError) => {
+  try {
+    const q = query(collection(db, SESSIONS_COL), orderBy('openedAt', 'desc'));
+    return onSnapshot(q, (snapshot) => {
+      const sessions = [];
+      snapshot.forEach(docSnap => {
+        sessions.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      onUpdate(sessions);
+    }, (err) => {
+      console.warn('Firebase sessions subscription fallback:', err);
+      if (onError) onError(err);
+    });
+  } catch (err) {
+    console.warn('Firestore sessions unavailable:', err);
+    return () => {};
+  }
+};
+
+// Save or Update Dining Session in Firebase
+export const saveDiningSessionToFirebase = async (session) => {
+  try {
+    const docRef = doc(db, SESSIONS_COL, session.id);
+    await setDoc(docRef, {
+      ...session,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return true;
+  } catch (err) {
+    console.warn('Could not sync session to Firebase:', err);
     return false;
   }
 };

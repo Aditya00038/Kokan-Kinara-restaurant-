@@ -5,86 +5,143 @@ import Navbar from './components/Navbar';
 import LandingPage from './components/Landing/LandingPage';
 import AuthPage from './components/Auth/AuthPage';
 import CustomerPortal from './components/Customer/CustomerPortal';
+import DineInQRPortal from './components/Customer/DineInQRPortal';
 import KitchenDisplay from './components/Kitchen/KitchenDisplay';
+import WaiterDashboard from './components/Waiter/WaiterDashboard';
 import SystemManager from './components/System/SystemManager';
+import CashierPOS from './components/Cashier/CashierPOS';
+import AdminAnalytics from './components/Admin/AdminAnalytics';
 import PWABadge from './PWABadge.jsx';
 
 function MainApp() {
   const { setCurrentView } = useRestaurant();
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, loginAsDemoRole } = useAuth();
 
-  // Primary page mode: 'landing' | 'auth' | 'app'
-  const [viewMode, setViewMode] = useState('landing');
+  // URL Path router supporting clean dedicated routes:
+  // '/online', '/dine-in', '/kitchen', '/waiter', '/manager', '/cashier', '/admin', '/auth', '/'
+  const [currentPath, setCurrentPath] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      if (path && path !== '/') return path;
+    }
+    return '/';
+  });
+
   const [targetRoleForAuth, setTargetRoleForAuth] = useState('customer');
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Strict route protection: user cannot be in 'app' without being logged in
+  // Sync with browser navigation (Back / Forward)
   useEffect(() => {
-    if (!loading) {
-      if (currentUser) {
-        setViewMode('app');
-        if (currentUser.defaultView) {
-          setCurrentView(currentUser.defaultView);
-        }
-      } else {
-        if (viewMode === 'app') {
-          setViewMode('auth');
-        }
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase() || '/';
+      setCurrentPath(path);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (path) => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', path);
+      setCurrentPath(path.split('?')[0].toLowerCase() || '/');
+    }
+  };
+
+  // If user signs in or changes, optionally navigate to role view if on auth
+  useEffect(() => {
+    if (!loading && currentUser) {
+      if (currentPath === '/auth') {
+        const rolePaths = {
+          customer: '/online',
+          waiter: '/waiter',
+          kitchen: '/kitchen',
+          manager: '/manager',
+          cashier: '/cashier',
+          admin: '/admin'
+        };
+        navigateTo(rolePaths[currentUser.role] || '/online');
       }
     }
   }, [currentUser, loading]);
 
-  // When user clicks Get Started or a role card from landing page
   const handleOpenAuth = (role = 'customer') => {
     setTargetRoleForAuth(role);
-    setViewMode('auth');
+    navigateTo('/auth');
   };
 
-  // When auth succeeds with a real registered user, go directly to their dedicated dashboard
   const handleAuthSuccess = (user) => {
-    setViewMode('app');
-    if (user && user.defaultView) {
-      setCurrentView(user.defaultView);
-    }
+    const rolePaths = {
+      customer: '/online',
+      waiter: '/waiter',
+      kitchen: '/kitchen',
+      manager: '/manager',
+      cashier: '/cashier',
+      admin: '/admin'
+    };
+    navigateTo(rolePaths[user?.role] || '/online');
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-amber-500 selection:text-white">
-      
-      {/* 1. Full Landing Page */}
-      {viewMode === 'landing' && (
-        <LandingPage
-          onGetStarted={() => handleOpenAuth('customer')}
-          onSelectRole={(role) => handleOpenAuth(role)}
+    <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900 selection:bg-red-600 selection:text-white">
+      {/* 1. SEPARATE OFFLINE QR DINE-IN EXPERIENCE (/dine-in) */}
+      {currentPath.startsWith('/dine-in') && (
+        <DineInQRPortal
+          onNavigateHome={() => navigateTo('/')}
         />
       )}
 
-      {/* 2. Full Authentication Page (Requires Registration / Login) */}
-      {viewMode === 'auth' && (
+      {/* 2. AUTHENTICATION PAGE (/auth) */}
+      {currentPath === '/auth' && (
         <AuthPage
           initialRole={targetRoleForAuth}
-          onBackToHome={() => setViewMode('landing')}
+          onBackToHome={() => navigateTo('/')}
           onAuthSuccess={handleAuthSuccess}
         />
       )}
 
-      {/* 3. Main Restaurant Workstations (STRICTLY for Authenticated Registered Users) */}
-      {viewMode === 'app' && currentUser && (
+      {/* 3. HOME LANDING PAGE (/ or /home) */}
+      {(currentPath === '/' || currentPath === '/home') && (
+        <LandingPage
+          onGetStarted={() => navigateTo('/online')}
+          onOpenDineIn={() => navigateTo('/dine-in')}
+          onSelectRole={(role) => {
+            loginAsDemoRole(role);
+            const rolePaths = {
+              customer: '/online',
+              waiter: '/waiter',
+              kitchen: '/kitchen',
+              manager: '/manager',
+              cashier: '/cashier',
+              admin: '/admin'
+            };
+            navigateTo(rolePaths[role] || '/online');
+          }}
+        />
+      )}
+
+      {/* 4. WORKSPACE STATIONS & PAGES WITH NAVBAR */}
+      {!currentPath.startsWith('/dine-in') && currentPath !== '/auth' && currentPath !== '/' && currentPath !== '/home' && (
         <>
-          {/* Top Dedicated Navigation Header */}
-          <Navbar 
-            onOpenCart={() => setIsCartOpen(true)} 
-            onOpenAuth={() => setViewMode('auth')}
-            onGoToLanding={() => setViewMode('landing')}
+          <Navbar
+            currentPath={currentPath}
+            onNavigate={navigateTo}
+            onOpenCart={() => setIsCartOpen(true)}
+            onOpenAuth={() => navigateTo('/auth')}
+            onGoToLanding={() => navigateTo('/')}
           />
 
-          {/* Dedicated Department Workspace strictly matching user's role */}
           <main className="flex-1 pb-10">
-            {currentUser.role === 'customer' && (
+            {/* A. DEDICATED ONLINE ORDERING PAGE */}
+            {currentPath === '/online' && (
               <CustomerPortal isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} />
             )}
-            {currentUser.role === 'kitchen' && <KitchenDisplay />}
-            {(currentUser.role === 'system' || currentUser.role === 'manager' || currentUser.role === 'cashier') && <SystemManager />}
+
+            {/* B. STAFF STATIONS */}
+            {currentPath === '/kitchen' && <KitchenDisplay />}
+            {currentPath === '/waiter' && <WaiterDashboard />}
+            {(currentPath === '/manager' || currentPath === '/system') && <SystemManager />}
+            {currentPath === '/cashier' && <CashierPOS />}
+            {currentPath === '/admin' && <AdminAnalytics />}
           </main>
         </>
       )}

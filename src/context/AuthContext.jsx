@@ -13,76 +13,76 @@ import {
 const AuthContext = createContext();
 
 /**
- * Strict role detection based on email domain:
- * - @gmail.com -> Dining Customer
- * - @staff.com -> Chef / Kitchen Staff
- * - @admin.com -> Restaurant Manager
+ * Role detection based on role keyword or email identifier:
+ * - admin -> Restaurant Admin (Executive Analytics & Strategy)
+ * - manager / @admin.com -> Restaurant Manager (Daily operations, reservations, dispatch)
+ * - waiter -> Waitstaff Captain (Tables, service calls, serving food)
+ * - chef / kitchen / @staff.com -> Kitchen Staff (Cooking tickets & prep)
+ * - default -> Online Customer (Web ordering & reservations)
  */
 export const detectRoleFromEmail = (email = '') => {
   const lower = email.trim().toLowerCase();
 
-  // 1. Manager domain (@admin.com)
-  if (lower.endsWith('@admin.com')) {
+  // 1. Admin
+  if (lower.includes('admin') && !lower.startsWith('manager')) {
     return {
-      role: 'system',
+      role: 'admin',
+      label: 'Restaurant Admin',
+      defaultView: 'admin',
+      badgeColor: 'badge-purple',
+      accentColor: 'indigo'
+    };
+  }
+
+  // 2. Manager
+  if (lower.includes('manager') || lower.endsWith('@admin.com')) {
+    return {
+      role: 'manager',
       label: 'Restaurant Manager',
       defaultView: 'system',
-      domain: '@admin.com',
       badgeColor: 'badge-purple',
-      accentColor: 'violet',
-      allowedDomain: '@admin.com'
+      accentColor: 'violet'
     };
   }
 
-  // 2. Chef / Kitchen domain (@staff.com)
-  if (lower.endsWith('@staff.com')) {
+  // 3. Waiter
+  if (lower.includes('waiter')) {
+    return {
+      role: 'waiter',
+      label: 'Waitstaff Captain',
+      defaultView: 'waiter',
+      badgeColor: 'badge-amber',
+      accentColor: 'amber'
+    };
+  }
+
+  // 4. Chef / Kitchen
+  if (lower.includes('chef') || lower.includes('kitchen') || lower.endsWith('@staff.com')) {
     return {
       role: 'kitchen',
-      label: 'Chef / Kitchen',
+      label: 'Head Chef / Kitchen',
       defaultView: 'kitchen',
-      domain: '@staff.com',
       badgeColor: 'badge-rose',
-      accentColor: 'rose',
-      allowedDomain: '@staff.com'
+      accentColor: 'rose'
     };
   }
 
-  // 3. Dining Customer domain (@gmail.com)
+  // 5. Online Dining Customer (Default for all regular customer emails)
   return {
     role: 'customer',
-    label: 'Dining Customer',
+    label: 'Online Customer',
     defaultView: 'customer',
-    domain: '@gmail.com',
     badgeColor: 'badge-emerald',
-    accentColor: 'emerald',
-    allowedDomain: '@gmail.com'
+    accentColor: 'emerald'
   };
 };
 
 /**
- * Validate that an email meets domain rules:
- * - Customers: must use @gmail.com
- * - Kitchen & Chef: must use @staff.com
- * - Manager: must use @admin.com
+ * Validate email format for role registration
  */
 export const validateRoleDomain = (email = '', intendedRole = 'customer') => {
   const lower = email.trim().toLowerCase();
-  if (!lower) return 'Please enter a valid email address.';
-
-  if (intendedRole === 'customer') {
-    if (!lower.endsWith('@gmail.com')) {
-      return 'Customers must register and log in with a valid @gmail.com email address.';
-    }
-  } else if (intendedRole === 'kitchen') {
-    if (!lower.endsWith('@staff.com')) {
-      return 'Chef & Kitchen staff accounts must use an official @staff.com email address.';
-    }
-  } else if (intendedRole === 'system' || intendedRole === 'manager' || intendedRole === 'admin') {
-    if (!lower.endsWith('@admin.com')) {
-      return 'Restaurant Manager accounts must use an official @admin.com email address.';
-    }
-  }
-
+  if (!lower || !lower.includes('@')) return 'Please enter a valid email address.';
   return null;
 };
 
@@ -263,6 +263,73 @@ export function AuthProvider({ children }) {
   };
 
   /**
+   * 1-Click Demo Login for any role (Customer, Waiter, Chef, Manager, Admin)
+   */
+  const loginAsDemoRole = (role = 'customer') => {
+    const demoProfiles = {
+      customer: {
+        uid: 'demo-customer-1',
+        email: 'priya.sharma@gmail.com',
+        displayName: 'Priya Sharma (Customer)',
+        role: 'customer',
+        roleLabel: 'Online Customer',
+        defaultView: 'customer',
+        isFirebaseAuthenticated: false
+      },
+      waiter: {
+        uid: 'demo-waiter-1',
+        email: 'waiter@kokankinara.com',
+        displayName: 'Floor Waitstaff',
+        role: 'waiter',
+        roleLabel: 'Waitstaff Captain',
+        defaultView: 'waiter',
+        isFirebaseAuthenticated: false
+      },
+      kitchen: {
+        uid: 'demo-chef-1',
+        email: 'chef@kokankinara.com',
+        displayName: 'Head Chef',
+        role: 'kitchen',
+        roleLabel: 'Head Chef',
+        defaultView: 'kitchen',
+        isFirebaseAuthenticated: false
+      },
+      manager: {
+        uid: 'demo-manager-1',
+        email: 'manager@kokankinara.com',
+        displayName: 'Restaurant Manager',
+        role: 'manager',
+        roleLabel: 'Restaurant Manager',
+        defaultView: 'system',
+        isFirebaseAuthenticated: false
+      },
+      cashier: {
+        uid: 'demo-cashier-1',
+        email: 'cashier@kokankinara.com',
+        displayName: 'Cashier / POS Operator',
+        role: 'cashier',
+        roleLabel: 'Billing Cashier',
+        defaultView: 'cashier',
+        isFirebaseAuthenticated: false
+      },
+      admin: {
+        uid: 'demo-admin-1',
+        email: 'admin@kokankinara.com',
+        displayName: 'Restaurant Admin',
+        role: 'admin',
+        roleLabel: 'Restaurant Admin',
+        defaultView: 'admin',
+        isFirebaseAuthenticated: false
+      }
+    };
+
+    const target = demoProfiles[role] || demoProfiles.customer;
+    setCurrentUser(target);
+    localStorage.setItem('rm_auth_user', JSON.stringify(target));
+    return { success: true, user: target };
+  };
+
+  /**
    * Real Firebase Sign-Out
    */
   const logout = async () => {
@@ -284,6 +351,7 @@ export function AuthProvider({ children }) {
         loginWithEmail,
         signupWithEmail,
         loginWithGoogle,
+        loginAsDemoRole,
         logout
       }}
     >

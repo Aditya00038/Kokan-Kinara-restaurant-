@@ -1,6 +1,38 @@
 // Official Kokan Kinara Restaurant Data (Pure Veg & Non-Veg Menu)
 
-export const INITIAL_MENU = [
+export const DEFAULT_TODAYS_SPECIAL_IDS = [
+  'kk-thali-1', // Surmai Thali
+  'kk-thali-2', // Pomfret Thali
+  'kk-thali-3', // Prawns / Kolambi Thali
+  'kk-thali-7', // Special Mutton Thali
+  'kk-thali-10', // Gavran Chicken Thali
+  'kk-sea-1',   // Surmai Tawa Rava Fry
+  'kk-sea-3',   // Paplet Tawa Rava Fry
+  'kk-rice-1',  // Chicken Dum Biryani
+  'kk-drink-1', // Authentic Kokani Solkadhi
+  'kk-drink-3'  // Ukadiche Modak
+];
+
+export const DEFAULT_WEEKLY_BEST_IDS = [
+  'kk-thali-1', // Surmai Thali
+  'kk-sea-3',   // Paplet Tawa Rava Fry
+  'kk-rice-1',  // Chicken Dum Biryani
+  'kk-drink-1', // Authentic Kokani Solkadhi
+  'kk-sea-8',   // Fresh Bombil Rava Fry
+  'kk-snack-3'  // Kothimbir Vadi
+];
+
+export const DEFAULT_MONTHLY_BEST_IDS = [
+  'kk-thali-3',  // Prawns / Kolambi Thali
+  'kk-thali-7',  // Special Mutton Thali
+  'kk-veg-3',    // Paneer Peshwai
+  'kk-drink-3',  // Ukadiche Modak
+  'kk-sea-10',   // Surmai Malvani Handi
+  'kk-meat-1',   // Mutton Fry Special
+  'kk-thali-10'  // Gavran Chicken Thali
+];
+
+const RAW_MENU = [
   // ==========================================
   // 1. Thali Special
   // ==========================================
@@ -1009,75 +1041,58 @@ export const INITIAL_MENU = [
   }
 ];
 
+export const INITIAL_MENU = RAW_MENU.map(item => ({
+  ...item,
+  isTodaysSpecial: DEFAULT_TODAYS_SPECIAL_IDS.includes(item.id),
+  isWeeklyBest: DEFAULT_WEEKLY_BEST_IDS.includes(item.id),
+  isMonthlyBest: DEFAULT_MONTHLY_BEST_IDS.includes(item.id)
+}));
+
 export const INITIAL_TABLES = [
-  { id: 'T1', number: 1, capacity: 2, section: 'Indoor AC', status: 'available' },
-  { id: 'T2', number: 2, capacity: 4, section: 'Window View', status: 'available' },
-  { id: 'T3', number: 3, capacity: 4, section: 'Window View', status: 'occupied' }, // Occupied to demonstrate alternative suggestion!
-  { id: 'T4', number: 4, capacity: 6, section: 'Family Hall', status: 'available' },
-  { id: 'T5', number: 5, capacity: 2, section: 'Garden Patio', status: 'available' },
-  { id: 'T6', number: 6, capacity: 8, section: 'VIP Lounge', status: 'reserved' },
-  { id: 'T7', number: 7, capacity: 4, section: 'Garden Patio', status: 'available' },
-  { id: 'T8', number: 8, capacity: 6, section: 'Rooftop Terrace', status: 'available' }
+  { id: 'T1', number: 1, capacity: 2, section: 'Indoor AC', status: 'available', qrToken: 'kk-qr-t1-9a7f' },
+  { id: 'T2', number: 2, capacity: 4, section: 'Window View', status: 'available', qrToken: 'kk-qr-t2-4c8d' },
+  { id: 'T3', number: 3, capacity: 4, section: 'Window View', status: 'available', qrToken: 'kk-qr-t3-7e2a' },
+  { id: 'T4', number: 4, capacity: 6, section: 'Family Hall', status: 'available', qrToken: 'kk-qr-t4-1b5e' },
+  { id: 'T5', number: 5, capacity: 2, section: 'Garden Patio', status: 'available', qrToken: 'kk-qr-t5-8f3c' },
+  { id: 'T6', number: 6, capacity: 8, section: 'VIP Lounge', status: 'available', qrToken: 'kk-qr-t6-2d9b' },
+  { id: 'T7', number: 7, capacity: 4, section: 'Garden Patio', status: 'available', qrToken: 'kk-qr-t7-5a1e' },
+  { id: 'T8', number: 8, capacity: 6, section: 'Rooftop Terrace', status: 'available', qrToken: 'kk-qr-t8-3c4f' }
 ];
 
-export const INITIAL_ORDERS = [
-  {
-    id: 'ORD-1001',
-    customerName: 'Sushant Sawant',
-    customerPhone: '+91 98201 45879',
-    orderType: 'dine-in',
-    tableId: 'T3',
-    tableNumber: 3,
-    items: [
-      { id: 'kk-thali-1', name: 'Surmai Thali', price: 440, quantity: 2, notes: 'With Tandul Bhakri' },
-      { id: 'kk-sea-5', name: 'Kolambi Tawa Rava Fry', price: 320, quantity: 1, notes: 'Crispy rava fry' },
-      { id: 'kk-drink-1', name: 'Authentic Kokani Solkadhi', price: 35, quantity: 2, notes: 'Chilled' }
-    ],
-    status: 'ORDER_READY', // Ready, bill generated, ready for cashier/payment
-    subtotal: 1270,
-    taxRate: 0.05,
-    taxAmount: 63.50,
-    discountCode: null,
-    discountAmount: 0,
-    total: 1333.50,
-    paymentStatus: 'PENDING',
-    paymentMethod: null,
-    createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-    logs: [
-      { time: '25m ago', action: 'Order placed & validated' },
-      { time: '22m ago', action: 'Kitchen started preparation' },
-      { time: '4m ago', action: 'Kitchen marked order as ready' },
-      { time: '4m ago', action: 'System generated bill (₹1,333.50)' }
-    ]
-  },
-  {
-    id: 'ORD-1002',
-    customerName: 'Anil Kamble',
-    customerPhone: '+91 98923 11204',
-    orderType: 'dine-in',
-    tableId: 'T4',
-    tableNumber: 4,
-    items: [
-      { id: 'kk-thali-7', name: 'Special Mutton Thali', price: 450, quantity: 1, notes: 'Bhakri with Tambda Rassa' },
-      { id: 'kk-meat-1', name: 'Mutton Fry', price: 320, quantity: 1, notes: 'Extra spicy' },
-      { id: 'kk-bread-1', name: 'Tandul Bhakri', price: 40, quantity: 2, notes: 'Fresh & hot' }
-    ],
-    status: 'KITCHEN_PREPARING',
-    subtotal: 850,
-    taxRate: 0.05,
-    taxAmount: 42.50,
-    discountCode: null,
-    discountAmount: 0,
-    total: 892.50,
-    paymentStatus: 'PENDING',
-    paymentMethod: null,
-    createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    logs: [
-      { time: '12m ago', action: 'Order placed & validated' },
-      { time: '9m ago', action: 'Kitchen received ticket & started cooking' }
-    ]
-  }
-];
+export const DINING_SESSION_STATUSES = {
+  ACTIVE: 'ACTIVE',
+  BILL_REQUESTED: 'BILL_REQUESTED',
+  BILL_GENERATED: 'BILL_GENERATED',
+  PAYMENT_PENDING: 'PAYMENT_PENDING',
+  CLOSED: 'CLOSED'
+};
+
+export const INITIAL_DINING_SESSIONS = [];
+
+export const ORDER_SOURCES = {
+  ONLINE_DELIVERY: 'ONLINE_DELIVERY',
+  ONLINE_TAKEAWAY: 'ONLINE_TAKEAWAY',
+  OFFLINE_DINE_IN_QR: 'OFFLINE_DINE_IN_QR',
+  STAFF_DINE_IN: 'STAFF_DINE_IN'
+};
+
+export const RESERVATION_STATUSES = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CHECKED_IN: 'CHECKED_IN',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  REJECTED: 'REJECTED',
+  NO_SHOW: 'NO_SHOW'
+};
+
+export const INITIAL_RESERVATIONS = [];
+
+export const INITIAL_STAFF = [];
+
+export const INITIAL_SERVICE_REQUESTS = [];
+
+export const INITIAL_ORDERS = [];
 
 export const PROMO_CODES = {
   WELCOME10: { code: 'WELCOME10', discountType: 'percentage', value: 10, label: '10% Welcome Discount' },
